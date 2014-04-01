@@ -36,7 +36,12 @@ class Vector3
 		Vector3  CrossProduct(const Vector3& rhs)const;
 		Vector3  Normalize();
 	private:
+
+#if defined(USE_INTRINSICS)
+		__m128 m_elems;
+#else
 		float m_elems[3];
+#endif
 };
 
 Vector3  operator*(float scalar,const Vector3& vec);

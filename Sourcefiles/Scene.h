@@ -6,21 +6,15 @@
 #include "SceneObject.h"
 #include "Camera.h"
 
-typedef vector<SceneObject*>::iterator shapeItr;
-typedef vector<Light*>::iterator lightItr;
 
 class Scene
 {
 	public:
-		Scene(){};
+		Scene():m_numLights(0),m_numObjects(0){};
 
-		~Scene()
-		{
-			
-		}
 
-		void  AddLight(Light* newLight)			{m_lights.push_back(newLight);}
-		void  AddObject(SceneObject* newObject)	{m_objects.push_back(newObject);}
+		void  AddLight(Light* newLight);
+		void  AddObject(SceneObject* newObject);
 		Color TraceRay(const Ray& ray) const;
 
 		void Render(const Camera& cam,ofstream& outStream,int imgSize);
@@ -29,8 +23,11 @@ class Scene
 	private:
 		Color GenerateColor(const Vector3& point,const SceneObject* obj)const;
 
-		std::vector<Light*>			m_lights;
-		std::vector<SceneObject*>	m_objects;
+		Light*			m_lights[10];
+		SceneObject*	m_sceneObjects[10];
+
+		int				m_numLights;
+		int				m_numObjects;
 };
 
 

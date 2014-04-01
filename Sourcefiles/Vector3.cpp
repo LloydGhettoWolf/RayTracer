@@ -2,6 +2,7 @@
 #include "Vector3.h"
 
 
+
 Vector3::Vector3()
 {
 	m_elems[0] = m_elems[1] = m_elems[2] = 0.0f;

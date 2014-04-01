@@ -27,9 +27,6 @@
     <ClInclude Include="Sourcefiles\Light.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="Sourcefiles\Plane.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="Sourcefiles\Ray.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
@@ -37,9 +34,6 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Sourcefiles\SceneObject.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
-    <ClInclude Include="Sourcefiles\Sphere.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="Sourcefiles\Vector3.h">
@@ -59,10 +53,10 @@
     <ClCompile Include="Sourcefiles\Scene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Sourcefiles\Sphere.cpp">
+    <ClCompile Include="Sourcefiles\Vector3.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="Sourcefiles\Vector3.cpp">
+    <ClCompile Include="SourceFiles\SceneObject.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>

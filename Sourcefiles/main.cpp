@@ -1,9 +1,7 @@
 //main.cpp - main 
 #include "Camera.h"
 #include "Scene.h"
-#include "Sphere.h"
 #include "Light.h"
-#include "Plane.h"
 
 #include "Camera.h"
 using namespace std;
@@ -17,22 +15,35 @@ int main()
 	Scene myScene;
 	ofstream outFile;
 
-	outFile.open("test.ppm");
-	Plane  myPlane(Vector3(0.0f,1.0f,0.0f),0.0f,Color(0.5f,0.0f,0.5f));
+	//for profiling
+	LARGE_INTEGER t1,t2,frequency;
+	double elapsedTime;
 
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&t1);
+
+	outFile.open("test.ppm");
+
+	//create lights
 	Light  myLight1(Color(0.8f,0.8f,0.8f),Vector3(-10.0f,10.0f,5.0f));
 	Light  myLight2(Color(0.3f,0.3f,0.3f),Vector3(5.0f,3.0f,5.0f));
 
-	Sphere mySphere1(0.5f,Vector3(-1.2f,0.5f,0.0f),Color(1.0f,0.0f,0.0f));
-	Sphere mySphere2(0.5f,Vector3(0.0f,0.5f,0.0f),Color(0.0f,1.0f,0.0f));
-	Sphere mySphere3(0.5f,Vector3(1.2f,0.5f,0.0f),Color(0.0f,0.0f,1.0f));
+	//create objects
+	//spheres
+	SceneObject so1(Color(0.0f,1.0f,0.0f),SPHERETYPE,Vector3(-1.2f,0.5f,0.0f),0.5f);
+	SceneObject so2(Color(1.0f,0.0f,0.0f),SPHERETYPE,Vector3(0.0f,0.5f,0.0f),0.5f);
+	SceneObject so3(Color(0.0f,0.0f,1.0f),SPHERETYPE,Vector3(1.2f,0.5f,0.0f),0.5f);
+	
+	//planes
+	SceneObject po1(Color(0.5f,0.0f,0.5f),PLANETYPE,Vector3(0.0f,1.0f,0.0f),0.0f);
 
-	myScene.AddObject((SceneObject*)&mySphere1);
-	myScene.AddObject((SceneObject*)&mySphere2);
-	myScene.AddObject((SceneObject*)&mySphere3);
-	myScene.AddObject((SceneObject*)&myPlane);
+	//add them to the scene
 	myScene.AddLight(&myLight1);
 	myScene.AddLight(&myLight2);
+	myScene.AddObject(&so1);
+	myScene.AddObject(&so2);
+	myScene.AddObject(&so3);
+	myScene.AddObject(&po1);
 
 	Camera myCam(Vector3(-1.5f,1.0f,3.0f),Vector3(-0.3f,0.5f,0.0f),Vector3(0.0f,1.0f,0.0f));
 
@@ -40,13 +51,11 @@ int main()
 
 	outFile.close();
 
-	Ray camRay = myCam.GetRayForPixel(512/2,34,512);
+	QueryPerformanceCounter(&t2);
 
-	cout << "Ray Origin :" << camRay.GetOrigin()<<endl<<" Ray Direction:"<< camRay.GetDirection() <<endl;
+	elapsedTime = (t2.QuadPart - t1.QuadPart) * 1000.0f/frequency.QuadPart;
 
-	Color col = myScene.TraceRay(camRay);
-	
-	cout << "color:" << col <<endl;
+	cout << "elapsed Time : "<< elapsedTime <<endl;
 
 	return 0;
 }
