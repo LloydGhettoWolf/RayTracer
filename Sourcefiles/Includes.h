@@ -8,6 +8,14 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
-#include <vector>
+#include <Windows.h>
+
+//#define USE_INTRINSICS 
+
+#if defined(USE_INTRINSICS)
+
+#include <smmintrin.h>
+
+#endif
 
 #endif

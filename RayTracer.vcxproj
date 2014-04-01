@@ -15,11 +15,9 @@
     <ClInclude Include="Sourcefiles\Color.h" />
     <ClInclude Include="Sourcefiles\Includes.h" />
     <ClInclude Include="Sourcefiles\Light.h" />
-    <ClInclude Include="Sourcefiles\Plane.h" />
     <ClInclude Include="Sourcefiles\Ray.h" />
     <ClInclude Include="Sourcefiles\Scene.h" />
     <ClInclude Include="Sourcefiles\SceneObject.h" />
-    <ClInclude Include="Sourcefiles\Sphere.h" />
     <ClInclude Include="Sourcefiles\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
@@ -27,7 +25,7 @@
     <ClCompile Include="Sourcefiles\Color.cpp" />
     <ClCompile Include="Sourcefiles\main.cpp" />
     <ClCompile Include="Sourcefiles\Scene.cpp" />
-    <ClCompile Include="Sourcefiles\Sphere.cpp" />
+    <ClCompile Include="SourceFiles\SceneObject.cpp" />
     <ClCompile Include="Sourcefiles\Vector3.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

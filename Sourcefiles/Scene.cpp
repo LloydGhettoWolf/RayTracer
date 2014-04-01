@@ -1,9 +1,22 @@
 //Scene.cpp
 #include "Scene.h"
 
+const int MAX_LIGHTS = 10;
+const int MAX_OBJS   = 10;
 
-typedef vector<SceneObject*>::const_iterator constShapeItr;
-typedef vector<Light*>::const_iterator constLightItr;
+void  Scene::AddLight(Light* newLight)
+{
+	assert(m_numLights < MAX_LIGHTS && "tried to add too many lights! \n");
+
+	m_lights[m_numLights++] = newLight;
+}
+
+void  Scene::AddObject(SceneObject* newObject)
+{
+	assert(m_numObjects < MAX_LIGHTS && "tried to add too many lights! \n");
+
+	m_sceneObjects[m_numObjects++] = newObject;
+}
 
 Color Scene::TraceRay(const Ray& ray) const
 {
@@ -11,14 +24,14 @@ Color Scene::TraceRay(const Ray& ray) const
 	float t = 1000.0f;
 	SceneObject *sceneObj = NULL;
 
-	for(constShapeItr sItr = m_objects.begin(); sItr != m_objects.end(); sItr++)
+	for(int shape = 0; shape < m_numObjects; shape++)
 	{
-		float newT = (*sItr)->GetIntersection(ray); 
+		float newT = m_sceneObjects[shape]->GetIntersection(ray); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
 			t = newT;
-			sceneObj = *sItr;
+			sceneObj = m_sceneObjects[shape];
 		}
 	}
 
@@ -34,16 +47,16 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj)const
 {
 	Color newColor(0.0f,0.0f,0.0f);
 
-	for(constLightItr lItr = m_lights.begin(); lItr != m_lights.end(); lItr++)
+	for(int light = 0; light < m_numLights; light++)
 	{
-		Vector3 toLight = (*lItr)->GetPosition() - point;
+		Vector3 toLight = m_lights[light]->GetPosition() - point;
 		toLight = toLight.Normalize();
 		Vector3 normal = obj->GetSurfaceNormal(point);
 		float dotProduct = toLight.DotProduct(normal);
 
 		assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
 
-		newColor += obj->GetColor() * (*lItr)->GetColor() *  max(dotProduct,0.0f);
+		newColor += obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
 	}
 
 	return newColor;
