@@ -10,6 +10,7 @@
 #include <cmath>
 #include <Windows.h>
 
+
 //#define USE_INTRINSICS 
 
 #if defined(USE_INTRINSICS)
