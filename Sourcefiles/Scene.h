@@ -6,18 +6,23 @@
 #include "SceneObject.h"
 #include "Camera.h"
 
+struct rgbColorVal
+{
+	int r,g,b;
+};
 
 class Scene
 {
 	public:
-		Scene():m_numLights(0),m_numObjects(0){};
-
+		Scene(int imgSize):m_numLights(0),m_numObjects(0){ m_SceneMem = new rgbColorVal[imgSize*imgSize];}
+		~Scene(){delete [] m_SceneMem;}
 
 		void  AddLight(Light* newLight);
 		void  AddObject(SceneObject* newObject);
 		Color TraceRay(const Ray& ray) const;
 
-		void Render(const Camera& cam,ofstream& outStream,int imgSize);
+		void Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int imgSize);
+		void Scene::WriteToFile(ofstream& outFile,int imgSize);
 
 
 	private:
@@ -25,6 +30,8 @@ class Scene
 
 		Light*			m_lights[10];
 		SceneObject*	m_sceneObjects[10];
+
+		rgbColorVal*    m_SceneMem;
 
 		int				m_numLights;
 		int				m_numObjects;

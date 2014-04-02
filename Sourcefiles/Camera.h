@@ -3,7 +3,7 @@
 #define _CAMERA_H
 #include "Ray.h"
 
-#define PI 3.1415926
+#define PI 3.1415926f
 
 #define CONV_CONSTANT (2.0f*PI)/360.0f 
 

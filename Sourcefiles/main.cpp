@@ -1,4 +1,5 @@
 //main.cpp - main 
+#include <boost\thread.hpp>
 #include "Camera.h"
 #include "Scene.h"
 #include "Light.h"
@@ -12,12 +13,17 @@ const int IMAGE_SIZE = 256;
 
 int main()
 {
-	Scene myScene;
+	Scene myScene(512);
 	ofstream outFile;
 
 	//for profiling
 	LARGE_INTEGER t1,t2,frequency;
+	SYSTEM_INFO sysInfo;
 	double elapsedTime;
+
+	GetSystemInfo(&sysInfo);
+
+	cout <<"num of coures: "<<sysInfo.dwNumberOfProcessors<<endl;
 
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&t1);
@@ -47,7 +53,22 @@ int main()
 
 	Camera myCam(Vector3(-1.5f,1.0f,3.0f),Vector3(-0.3f,0.5f,0.0f),Vector3(0.0f,1.0f,0.0f));
 
-	myScene.Render(myCam,outFile,512);
+	boost::thread thread1(&Scene::Render,&myScene,myCam,0,256,0,256,512);
+	boost::thread thread2(&Scene::Render,&myScene,myCam,0,256,256,512,512);
+	boost::thread thread3(&Scene::Render,&myScene,myCam,256,512,0,256,512);
+	boost::thread thread4(&Scene::Render,&myScene,myCam,256,512,256,512,512);
+
+	//myScene.Render(myCam,0,256,0,256,512);
+	//myScene.Render(myCam,0,256,256,512,512);
+	//myScene.Render(myCam,256,512,0,256,512);
+	//myScene.Render(myCam,256,512,256,512,512);
+
+	thread1.join();
+	thread2.join();
+	thread3.join();
+	thread4.join();
+
+	//myScene.WriteToFile(outFile,512);
 
 	outFile.close();
 
