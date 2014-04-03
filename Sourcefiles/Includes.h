@@ -9,6 +9,7 @@
 #include <fstream>
 #include <cmath>
 #include <Windows.h>
+#include <sstream>
 
 
 //#define USE_INTRINSICS 

@@ -19,7 +19,7 @@ class Vector3
 		Vector3 operator-(const Vector3& rhs)const;
 		Vector3 operator*(const Vector3& rhs)const;
 		Vector3 operator/(const Vector3& rhs)const;
-		Vector3 operator/(float rhs);
+		Vector3 operator/(const float rhs)const;
 
 		//compund arithmetic ops
 		Vector3& operator+=(const Vector3& rhs);
@@ -28,13 +28,10 @@ class Vector3
 		Vector3& operator/=(const Vector3& rhs);
 
 		//unary operator
-		Vector3 operator-();
+		//Vector3 operator-();
 
-		//vector specific ops
-		float    DotProduct(const Vector3& rhs)const;
 		float    Length()const;
-		Vector3  CrossProduct(const Vector3& rhs)const;
-		Vector3  Normalize();
+		//Vector3  Project(const Vector3& otherVector)const;
 	private:
 
 #if defined(USE_INTRINSICS)
@@ -44,6 +41,14 @@ class Vector3
 #endif
 };
 
+//unary operator
+Vector3 operator-(const Vector3& vec);
+
+//vector specific ops
+float    DotProduct(const Vector3& lhs,const Vector3& rhs);
+Vector3  CrossProduct(const Vector3& lhs,const Vector3& rhs);
+Vector3  Project(const Vector3& vec1,const Vector3& vec2);
+Vector3  Normalize(const Vector3& vec);
 Vector3  operator*(float scalar,const Vector3& vec);
 Vector3  operator*(const Vector3& vec,float scalar);
 ostream& operator<<(ostream& os,const Vector3& vec);

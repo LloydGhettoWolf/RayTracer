@@ -7,13 +7,13 @@
 #include "Camera.h"
 using namespace std;
 
-const int IMAGE_SIZE = 256;
+const int IMAGE_SIZE = 512;
 
 
 
 int main()
 {
-	Scene myScene(512);
+	Scene myScene(IMAGE_SIZE);
 	ofstream outFile;
 
 	//for profiling
@@ -36,12 +36,12 @@ int main()
 
 	//create objects
 	//spheres
-	SceneObject so1(Color(0.0f,1.0f,0.0f),SPHERETYPE,Vector3(-1.2f,0.5f,0.0f),0.5f);
-	SceneObject so2(Color(1.0f,0.0f,0.0f),SPHERETYPE,Vector3(0.0f,0.5f,0.0f),0.5f);
-	SceneObject so3(Color(0.0f,0.0f,1.0f),SPHERETYPE,Vector3(1.2f,0.5f,0.0f),0.5f);
+	SceneObject so1(Color(0.0f,1.0f,0.0f),SPHERETYPE,Vector3(-1.2f,0.5f,0.0f),0.5f,0.8f);
+	SceneObject so3(Color(0.0f,0.0f,1.0f),SPHERETYPE,Vector3(1.2f,0.5f,0.0f),0.5f,0.8f);
+	SceneObject so2(Color(1.0f,0.0f,0.0f),SPHERETYPE,Vector3(0.0f,0.5f,0.0f),0.5f,0.8f);
 	
 	//planes
-	SceneObject po1(Color(0.5f,0.0f,0.5f),PLANETYPE,Vector3(0.0f,1.0f,0.0f),0.0f);
+	SceneObject po1(Color(0.5f,0.0f,0.5f),PLANETYPE,Vector3(0.0f,1.0f,0.0f),0.0f,0.2f);
 
 	//add them to the scene
 	myScene.AddLight(&myLight1);
@@ -53,10 +53,10 @@ int main()
 
 	Camera myCam(Vector3(-1.5f,1.0f,3.0f),Vector3(-0.3f,0.5f,0.0f),Vector3(0.0f,1.0f,0.0f));
 
-	boost::thread thread1(&Scene::Render,&myScene,myCam,0,256,0,256,512);
-	boost::thread thread2(&Scene::Render,&myScene,myCam,0,256,256,512,512);
-	boost::thread thread3(&Scene::Render,&myScene,myCam,256,512,0,256,512);
-	boost::thread thread4(&Scene::Render,&myScene,myCam,256,512,256,512,512);
+	boost::thread thread1(&Scene::Render,&myScene,myCam,0,IMAGE_SIZE/2,0,IMAGE_SIZE/2,IMAGE_SIZE);
+	boost::thread thread2(&Scene::Render,&myScene,myCam,0,IMAGE_SIZE/2,IMAGE_SIZE/2,IMAGE_SIZE,IMAGE_SIZE);
+	boost::thread thread3(&Scene::Render,&myScene,myCam,IMAGE_SIZE/2,IMAGE_SIZE,0,IMAGE_SIZE/2,IMAGE_SIZE);
+	boost::thread thread4(&Scene::Render,&myScene,myCam,IMAGE_SIZE/2,IMAGE_SIZE,IMAGE_SIZE/2,IMAGE_SIZE,IMAGE_SIZE);
 
 	//myScene.Render(myCam,0,256,0,256,512);
 	//myScene.Render(myCam,0,256,256,512,512);
@@ -68,7 +68,7 @@ int main()
 	thread3.join();
 	thread4.join();
 
-	//myScene.WriteToFile(outFile,512);
+	myScene.WriteToFile(outFile,IMAGE_SIZE);
 
 	outFile.close();
 

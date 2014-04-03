@@ -19,14 +19,14 @@ class Scene
 
 		void  AddLight(Light* newLight);
 		void  AddObject(SceneObject* newObject);
-		Color TraceRay(const Ray& ray) const;
+		Color TraceRay(const Ray& ray,int depth = 0,int currentShape = -1) const;
 
 		void Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int imgSize);
 		void Scene::WriteToFile(ofstream& outFile,int imgSize);
 
 
 	private:
-		Color GenerateColor(const Vector3& point,const SceneObject* obj)const;
+		Color GenerateColor(const Vector3& point,const SceneObject* obj,const Vector3& normal)const;
 
 		Light*			m_lights[10];
 		SceneObject*	m_sceneObjects[10];

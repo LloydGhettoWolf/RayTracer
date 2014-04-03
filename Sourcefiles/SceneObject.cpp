@@ -31,14 +31,17 @@ const Vector3&  SceneObject::GetSurfaceNormal(const Vector3& point)const
 const Vector3&  SceneObject::GetSphereNormal(const Vector3& point)const
 {
 	Vector3 vec = point - m_normalOrPosition;
-	return vec.Normalize();
+	return Normalize(vec);
 }
 
 float			SceneObject::GetPlaneIntersection(const Ray& ray)
 {
-	float val1 = -(ray.GetOrigin().DotProduct(m_normalOrPosition) + m_radiusOrDistance);
-	float val2 = ray.GetDirection().DotProduct(m_normalOrPosition);
+	float val1 = DotProduct(-ray.GetOrigin(),m_normalOrPosition) + m_radiusOrDistance;
+	float val2 = DotProduct(ray.GetDirection(),m_normalOrPosition);
 	float tVal = val1/val2;
+	//int iVal = binary_cast<int>(tVal);
+	//int mask = (iVal & 0x80000000) >> 32;
+	//return (float)(iVal & mask);
 	return tVal  > 0.0f ? tVal : NO_INTERSECTION; 
 }
 
@@ -47,10 +50,15 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 	const Vector3& origin = ray.GetOrigin();
 	const Vector3& dir    = ray.GetDirection();
 
-	float a = dir.DotProduct(dir);
-	float b = 2.0f * (origin.DotProduct(dir) - dir.DotProduct(m_normalOrPosition));
-	float c = origin.DotProduct(origin) + m_normalOrPosition.DotProduct(m_normalOrPosition) 
-		    - 2.0f * origin.DotProduct(m_normalOrPosition) - (m_radiusOrDistance * m_radiusOrDistance);
+	//early out test - if the center projected on the ray is bigger than the radius then opt out
+	//float d = origin.DotProduct(m_normalOrPosition);
+
+	//if(d < m_radiusOrDistance) return NO_INTERSECTION;
+
+	float a = DotProduct(dir,dir);
+	float b = 2.0f * (DotProduct(origin,dir) - DotProduct(dir,m_normalOrPosition));
+	float c = DotProduct(origin,origin) + DotProduct(m_normalOrPosition,m_normalOrPosition) 
+		    - 2.0f * DotProduct(origin,m_normalOrPosition) - (m_radiusOrDistance * m_radiusOrDistance);
 
 	float discriminant = (b*b) - 4.0f * a * c;
 
@@ -61,5 +69,10 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 	float t1 = (-b + discriminant) / (2.0f * a);
 	float t2 = (-b - discriminant) / (2.0f * a);
 
-	return t1 < t2 ?  t1 : t2;
+	if(t1 < t2 && t1 > 0.0f) return t1;
+
+	if(t2 < t1 && t2 > 0.0f) return t2;
+
+	return NO_INTERSECTION;
+
 }

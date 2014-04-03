@@ -5,7 +5,7 @@
 #include "Color.h"
 #include "Ray.h"
 
-const float NO_INTERSECTION = -1;
+const float NO_INTERSECTION = 0.0f;
 
 enum ShapeType {SPHERETYPE,PLANETYPE};
 
@@ -13,10 +13,11 @@ enum ShapeType {SPHERETYPE,PLANETYPE};
 class SceneObject
 {
 	public:
-		SceneObject(Color& col,ShapeType type,Vector3& norm_pos,float radius_dist):m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),
-																 m_radiusOrDistance(radius_dist){};
+		SceneObject(Color& col,ShapeType type,Vector3& norm_pos,float radius_dist,float reflectivity):
+		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_reflectivity(reflectivity){};
 
 		float			GetIntersection(const Ray& ray);
+		float			GetReflectivity()const {return m_reflectivity;}
 		const Vector3&  GetSurfaceNormal(const Vector3& point)const;
 		const Color&	GetColor()const {return m_surfaceColor;}
 	private:
@@ -29,6 +30,8 @@ class SceneObject
 		ShapeType	m_type;
 		float		m_radiusOrDistance;
 		Vector3     m_normalOrPosition;
+
+		float m_reflectivity;
 };
 
 #endif

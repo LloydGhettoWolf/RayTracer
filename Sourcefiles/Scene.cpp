@@ -12,7 +12,7 @@ Side Effects: current number of lights incremented by one and light pointer adde
 */
 void  Scene::AddLight(Light* newLight)
 {
-	assert(m_numLights < MAX_LIGHTS && "tried to add too many lights! \n");
+	//assert(m_numLights < MAX_LIGHTS && "tried to add too many lights! \n");
 
 	m_lights[m_numLights++] = newLight;
 }
@@ -36,29 +36,57 @@ Args: A ray to test for intersections against
 Return: A color of the intersected shape if any intersections, or solid black if not
 Side Effects: None!
 */
-Color Scene::TraceRay(const Ray& ray) const
+Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 {
+
 	//find the lowest timeValue for any intersection
 	float t = 1000.0f;
 	SceneObject *sceneObj = NULL;
 
+	Vector3 surfaceNormal;
+	Vector3 reflectDirection;
+	Vector3 point;
+
+	int nextCurrentShape = currentShape;
+
 	for(int shape = 0; shape < m_numObjects; shape++)
 	{
+		if(shape == currentShape) continue;
+
 		float newT = m_sceneObjects[shape]->GetIntersection(ray); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
 			t = newT;
 			sceneObj = m_sceneObjects[shape];
+			nextCurrentShape = shape;
 		}
 	}
 
-	if(t == 1000.0f) 
+	if(t == 1000.0f || t == NO_INTERSECTION) 
 	{
-		t = NO_INTERSECTION;
+		return Color(0.0f,0.0f,0.0f);
+	}
+	else if(depth == 1)
+	{
+		point = ray.GetOrigin() + t * ray.GetDirection();
+		surfaceNormal = sceneObj->GetSurfaceNormal(point);
+		return GenerateColor(point,sceneObj,surfaceNormal);
+	}
+	else
+	{
+		//assert("it should never enter here!");
+		point = ray.GetOrigin() + t * ray.GetDirection();
+		surfaceNormal = sceneObj->GetSurfaceNormal(point);
+		reflectDirection = Normalize(ray.GetDirection() - (2.0f * DotProduct(ray.GetDirection(),surfaceNormal))*surfaceNormal);
+
+		Ray newRay = Ray(reflectDirection,point+reflectDirection * 0.001f);
+
+		return GenerateColor(point,sceneObj,surfaceNormal) + 
+			 sceneObj->GetReflectivity() * TraceRay(newRay,depth-1,nextCurrentShape);
 	}
 
-	return t == NO_INTERSECTION ? Color(0.0f,0.0f,0.0f) : GenerateColor(ray.GetOrigin() + t * ray.GetDirection(),sceneObj);
+	 
 }
 
 /*
@@ -69,18 +97,17 @@ Return: A generated color from the lighting
 Side Effects: None!
 */
 
-Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj)const
+Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vector3& normal)const
 {
 	Color newColor(0.0f,0.0f,0.0f);
 
 	for(int light = 0; light < m_numLights; light++)
 	{
 		Vector3 toLight = m_lights[light]->GetPosition() - point;
-		toLight = toLight.Normalize();
-		Vector3 normal = obj->GetSurfaceNormal(point);
-		float dotProduct = toLight.DotProduct(normal);
+		toLight = Normalize(toLight);
+		float dotProduct = DotProduct(toLight,normal);
 
-		assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
+		//assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
 
 		newColor += obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
 	}
@@ -105,7 +132,7 @@ void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int
 		{
 			int offset     = y * imgSize + x; 
 			Ray   pixelRay = cam.GetRayForPixel(x,y,imgSize);
-			Color col      = TraceRay(pixelRay);
+			Color col      = TraceRay(pixelRay,2);
 			col			   = 255.0f * col;
 			col.Clamp((float)0,(float)255);
 
@@ -122,6 +149,7 @@ void Scene::WriteToFile(ofstream& outFile,int imgSize)
 {
 	outFile <<"P3 "<< imgSize << " " << imgSize << " " << 255 << " \n";
 
+
 	for(int y = 0; y < imgSize; y++)
 	{
 		for(int x = 0; x < imgSize;x++)
@@ -130,4 +158,5 @@ void Scene::WriteToFile(ofstream& outFile,int imgSize)
 			outFile<< m_SceneMem[offset].r << " " << m_SceneMem[offset].g << " " << m_SceneMem[offset].b <<"\n";
 		}
 	}
+
 }
