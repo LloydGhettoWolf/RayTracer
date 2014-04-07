@@ -9,17 +9,28 @@ const float NO_INTERSECTION = 0.0f;
 
 enum ShapeType {SPHERETYPE,PLANETYPE};
 
+struct Material
+{
+	float specular;
+	float diffuse;
+	float reflection;
+	float refraction;
+};
 
 class SceneObject
 {
 	public:
-		SceneObject(Color& col,ShapeType type,Vector3& norm_pos,float radius_dist,float reflectivity):
-		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_reflectivity(reflectivity){};
+		SceneObject(Color& col,ShapeType type,Vector3& norm_pos,float radius_dist,Material& material):
+		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_material(material){};
+
+
 
 		float			GetIntersection(const Ray& ray);
-		float			GetReflectivity()const {return m_reflectivity;}
 		const Vector3&  GetSurfaceNormal(const Vector3& point)const;
 		const Color&	GetColor()const {return m_surfaceColor;}
+		ShapeType       GetType()const {return m_type;}
+
+		Material m_material;
 	private:
 		const Vector3&  GetSphereNormal(const Vector3& point)const;
 
@@ -31,7 +42,8 @@ class SceneObject
 		float		m_radiusOrDistance;
 		Vector3     m_normalOrPosition;
 
-		float m_reflectivity;
+
+		
 };
 
 #endif

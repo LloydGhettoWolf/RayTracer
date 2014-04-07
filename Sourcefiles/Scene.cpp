@@ -4,6 +4,10 @@
 const int MAX_LIGHTS = 10;
 const int MAX_OBJS   = 10;
 
+#define SPECULAR_ON
+
+#define SHADOWS_ON
+
 /*
 AddLight(Light* newLight)
 Args:   A pointer to a light to add to the current list/array of lights
@@ -82,8 +86,10 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 
 		Ray newRay = Ray(reflectDirection,point+reflectDirection * 0.001f);
 
+		//if(sceneObj->GetType() == PLANETYPE) depth++;
+
 		return GenerateColor(point,sceneObj,surfaceNormal) + 
-			 sceneObj->GetReflectivity() * TraceRay(newRay,depth-1,nextCurrentShape);
+			sceneObj->m_material.reflection * TraceRay(newRay,depth-1,nextCurrentShape);
 	}
 
 	 
@@ -100,19 +106,54 @@ Side Effects: None!
 Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vector3& normal)const
 {
 	Color newColor(0.0f,0.0f,0.0f);
+	Color spec(0.0f,0.0f,0.0f);
+
+	float lightCoeff = 1.0f;
 
 	for(int light = 0; light < m_numLights; light++)
 	{
 		Vector3 toLight = m_lights[light]->GetPosition() - point;
 		toLight = Normalize(toLight);
-		float dotProduct = DotProduct(toLight,normal);
+
+		float t = 1000.0f;
+		
+#ifdef SHADOWS_ON
+
+		for(int shape = 0; shape < m_numObjects; shape++)
+		{
+
+			float newT = m_sceneObjects[shape]->GetIntersection(Ray(toLight,point + toLight * 0.001f)); 
+		
+			if(newT<t && newT != NO_INTERSECTION)
+			{
+				lightCoeff = 0.5f;
+			}
+		}
+#endif
+
+float dotProduct = DotProduct(toLight,normal);
+
+#ifdef SPECULAR_ON
+
+	Vector3 reflectVector = toLight - 2.0f * dotProduct * normal;
+
+	float specCoeff  = DotProduct(Normalize(point),reflectVector);
+	spec    = obj->m_material.specular * Color(1.0f,1.0f,1.0f) *  pow(specCoeff,40.0f);
+
+#endif
+
+		
 
 		//assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
 
-		newColor += obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
+		Color diffuse = obj->m_material.diffuse  * obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
+		
+
+		newColor += diffuse + spec;
 	}
 
-	return newColor;
+	
+	return newColor * lightCoeff;
 }
 
 /*
