@@ -40,9 +40,6 @@ float			SceneObject::GetPlaneIntersection(const Ray& ray)
 	float val1 = DotProduct(-ray.GetOrigin(),m_normalOrPosition) + m_radiusOrDistance;
 	float val2 = DotProduct(ray.GetDirection(),m_normalOrPosition);
 	float tVal = val1/val2;
-	//int iVal = binary_cast<int>(tVal);
-	//int mask = (iVal & 0x80000000) >> 32;
-	//return (float)(iVal & mask);
 
 	return tVal  > 0.0f ? tVal : NO_INTERSECTION; 
 }

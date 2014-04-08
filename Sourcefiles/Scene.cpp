@@ -10,6 +10,8 @@ const int MAX_OBJS   = 10;
 #define SHADOWS_ON
 
 
+const int DEPTH = 3;
+
 /*
 AddLight(Light* newLight)
 Args:   A pointer to a light to add to the current list/array of lights
@@ -97,13 +99,6 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 	}
 
 
-	if(t == 1000.0f) 
-	{
-		t = NO_INTERSECTION;
-	}
-
-	return t == NO_INTERSECTION ? Color(0.0f,0.0f,0.0f) : GenerateColor(ray.GetOrigin() + t * ray.GetDirection(),sceneObj,surfaceNormal);
-
 }
 
 /*
@@ -119,6 +114,7 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 {
 	Color newColor(0.0f,0.0f,0.0f);
 	Color spec(0.0f,0.0f,0.0f);
+	Color diffuse(0.0f,0.0f,0.0f);
 
 	float lightCoeff = 1.0f;
 
@@ -152,14 +148,13 @@ float dotProduct = DotProduct(toLight,normal);
 	float specCoeff  = DotProduct(Normalize(point),reflectVector);
 	spec    = obj->m_material.specular * Color(1.0f,1.0f,1.0f) *  pow(specCoeff,40.0f);
 
+	//assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
+
+	diffuse = obj->m_material.diffuse  * obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
+#else
+    diffuse =  obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
 #endif
 
-		
-
-		//assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
-
-		Color diffuse = obj->m_material.diffuse  * obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
-		
 
 		newColor += diffuse + spec;
 	}
@@ -178,39 +173,44 @@ Side Effects - the output file is turned into a .ppm file of the raytraced image
 */
 void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int imgSize)
 {
-
+	int imgBottom = imgSize * (imgSize-1);
 
 	for(int y = yStart; y < yEnd; y++)
 	{
 		for(int x = xStart; x < xEnd;x++)
 		{
-			int offset     = y * imgSize + x; 
+			int offset     = imgBottom - (y * imgSize) + x; 
 			Ray   pixelRay = cam.GetRayForPixel(x,y,imgSize);
-			Color col      = TraceRay(pixelRay,2);
+			Color col      = TraceRay(pixelRay,DEPTH);
 
 			col			   = 255.0f * col;
 			col.Clamp((float)0,(float)255);
 
-			m_SceneMem[offset].r = (int)col[0];
-			m_SceneMem[offset].g = (int)col[1];
-			m_SceneMem[offset].b = (int)col[2];
+			m_SceneMem[offset].b = (char)col[0];
+			m_SceneMem[offset].g = (char)col[1];
+			m_SceneMem[offset].r = (char)col[2];
 
 		}
 	}
 
 }
 
-void Scene::WriteToFile(ofstream& outFile,int imgSize)
-{
-	outFile <<"P3 "<< imgSize << " " << imgSize << " " << 255 << " \n";
 
-	for(int y = 0; y < imgSize; y++)
-	{
-		for(int x = 0; x < imgSize;x++)
-		{
-			int offset     = y * imgSize + x; 
-			outFile<< m_SceneMem[offset].r << " " << m_SceneMem[offset].g << " " << m_SceneMem[offset].b <<"\n";
-		}
-	}
+void Scene::WriteToTGAFile(ofstream& outFile,int imgSize)
+{
+
+
+   char headerFile[18] = {0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
+
+   headerFile[12] = imgSize			& 0xFF;
+   headerFile[13] = (imgSize >> 8)	& 0xFF;
+   headerFile[14] = imgSize			& 0xFF;
+   headerFile[15] = (imgSize >> 8)	& 0xFF;
+   headerFile[16] = 24;
+
+   outFile.write(headerFile,18);
+
+   outFile.write((char*)m_SceneMem,imgSize*imgSize * 3);
+
 
 }

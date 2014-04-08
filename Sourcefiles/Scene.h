@@ -8,7 +8,7 @@
 
 struct rgbColorVal
 {
-	int r,g,b;
+	char r,g,b;
 };
 
 class Scene
@@ -23,7 +23,7 @@ class Scene
 
 
 		void Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int imgSize);
-		void Scene::WriteToFile(ofstream& outFile,int imgSize);
+		void Scene::WriteToTGAFile(ofstream& outFile,int imgSize);
 
 
 	private:

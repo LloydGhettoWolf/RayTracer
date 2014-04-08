@@ -30,7 +30,7 @@ Ray Camera::GetRayForPixel(int x,int y,int imgSize)const
 		             ((float)x/(float)(imgSize-1) - 0.5f) * m_rightVector;
 
 	//Vector3 pixelDir = Vector3((float)x,(float)y,0.0f) - m_position;
-	//pixelDir = Normalize(pixelDir);
+	pixelDir = Normalize(pixelDir);
 
 
 	return Ray(pixelDir,m_position);

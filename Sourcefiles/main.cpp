@@ -11,14 +11,13 @@ const int IMAGE_SIZE = 512;
 
 
 
-
 int main()
 {
 	Scene myScene(IMAGE_SIZE);
 	ofstream outFile;
 
 	//for profiling
-	LARGE_INTEGER t1,t2,frequency;
+	LARGE_INTEGER t1,t2,t3,frequency;
 	SYSTEM_INFO sysInfo;
 	double elapsedTime;
 
@@ -29,7 +28,8 @@ int main()
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&t1);
 
-	outFile.open("test.ppm");
+	outFile.open("test.tga",ofstream::binary);
+
 
 	Material sphereMaterial;
 	Material planeMaterial;
@@ -38,8 +38,8 @@ int main()
 	sphereMaterial.specular = 0.8f;
 	sphereMaterial.reflection = 0.8f;
 
-	planeMaterial.diffuse = 0.8f;
-	planeMaterial.specular = 0.2f;
+	planeMaterial.diffuse = 1.0f;
+	planeMaterial.specular = 0.0f;
 	planeMaterial.reflection = 0.5f;
 
 	//create lights
@@ -50,16 +50,16 @@ int main()
 	//spheres
 	SceneObject so1(Color(0.0f,1.0f,0.0f),SPHERETYPE,Vector3(-1.2f,0.5f,0.0f),0.5f,sphereMaterial);
 
-	sphereMaterial.diffuse   = 0.4f;
-	sphereMaterial.specular  = 0.6f;
+	//sphereMaterial.diffuse   = 0.4f;
+	//sphereMaterial.specular  = 0.6f;
 
 	SceneObject so2(Color(1.0f,0.0f,0.0f),SPHERETYPE,Vector3(0.0f,0.5f,0.0f),0.5f,sphereMaterial);
 
 	
 	
 	
-	sphereMaterial.diffuse   = 0.7f;
-	sphereMaterial.specular  = 0.3f;
+	//sphereMaterial.diffuse   = 0.7f;
+	//sphereMaterial.specular  = 0.3f;
 
 	SceneObject so3(Color(0.0f,0.0f,1.0f),SPHERETYPE,Vector3(1.2f,0.5f,0.0f),0.5f,sphereMaterial);
 
@@ -93,16 +93,25 @@ int main()
 	thread3.join();
 	thread4.join();
 
-	myScene.WriteToFile(outFile,IMAGE_SIZE);
-
-
-	outFile.close();
-
 	QueryPerformanceCounter(&t2);
 
 	elapsedTime = (t2.QuadPart - t1.QuadPart) * 1000.0f/frequency.QuadPart;
 
-	cout << "elapsed Time : "<< elapsedTime <<endl;
+	cout << "elapsed Time rendering : "<< elapsedTime <<endl;
+
+	myScene.WriteToTGAFile(outFile,IMAGE_SIZE);
+
+	outFile.close();
+
+	QueryPerformanceCounter(&t3);
+
+	elapsedTime = (t3.QuadPart - t2.QuadPart) * 1000.0f/frequency.QuadPart;
+
+	cout << "elapsed Time writing : "<< elapsedTime <<endl;
+
+	elapsedTime = (t3.QuadPart - t1.QuadPart) * 1000.0f/frequency.QuadPart;
+
+	cout << "total : "<< elapsedTime <<endl;
 
 	return 0;
 }
