@@ -17,6 +17,7 @@ struct Material
 	float refraction;
 };
 
+
 class SceneObject
 {
 	public:
@@ -31,6 +32,7 @@ class SceneObject
 		ShapeType       GetType()const {return m_type;}
 
 		Material m_material;
+
 	private:
 		const Vector3&  GetSphereNormal(const Vector3& point)const;
 
@@ -41,9 +43,6 @@ class SceneObject
 		ShapeType	m_type;
 		float		m_radiusOrDistance;
 		Vector3     m_normalOrPosition;
-
-
-		
 };
 
 #endif

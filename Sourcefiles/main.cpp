@@ -11,6 +11,7 @@ const int IMAGE_SIZE = 512;
 
 
 
+
 int main()
 {
 	Scene myScene(IMAGE_SIZE);
@@ -65,6 +66,7 @@ int main()
 	//planes
 	SceneObject po1(Color(0.5f,0.0f,0.5f),PLANETYPE,Vector3(0.0f,1.0f,0.0f),0.0f,planeMaterial);
 
+
 	//add them to the scene
 	myScene.AddLight(&myLight1);
 	myScene.AddLight(&myLight2);
@@ -80,6 +82,7 @@ int main()
 	boost::thread thread3(&Scene::Render,&myScene,myCam,IMAGE_SIZE/2,IMAGE_SIZE,0,IMAGE_SIZE/2,IMAGE_SIZE);
 	boost::thread thread4(&Scene::Render,&myScene,myCam,IMAGE_SIZE/2,IMAGE_SIZE,IMAGE_SIZE/2,IMAGE_SIZE,IMAGE_SIZE);
 
+
 	//myScene.Render(myCam,0,256,0,256,512);
 	//myScene.Render(myCam,0,256,256,512,512);
 	//myScene.Render(myCam,256,512,0,256,512);
@@ -91,6 +94,7 @@ int main()
 	thread4.join();
 
 	myScene.WriteToFile(outFile,IMAGE_SIZE);
+
 
 	outFile.close();
 

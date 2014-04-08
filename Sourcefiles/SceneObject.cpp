@@ -36,12 +36,14 @@ const Vector3&  SceneObject::GetSphereNormal(const Vector3& point)const
 
 float			SceneObject::GetPlaneIntersection(const Ray& ray)
 {
+
 	float val1 = DotProduct(-ray.GetOrigin(),m_normalOrPosition) + m_radiusOrDistance;
 	float val2 = DotProduct(ray.GetDirection(),m_normalOrPosition);
 	float tVal = val1/val2;
 	//int iVal = binary_cast<int>(tVal);
 	//int mask = (iVal & 0x80000000) >> 32;
 	//return (float)(iVal & mask);
+
 	return tVal  > 0.0f ? tVal : NO_INTERSECTION; 
 }
 
@@ -49,6 +51,7 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 {
 	const Vector3& origin = ray.GetOrigin();
 	const Vector3& dir    = ray.GetDirection();
+
 
 	//early out test - if the center projected on the ray is bigger than the radius then opt out
 	//float d = origin.DotProduct(m_normalOrPosition);
@@ -60,6 +63,7 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 	float c = DotProduct(origin,origin) + DotProduct(m_normalOrPosition,m_normalOrPosition) 
 		    - 2.0f * DotProduct(origin,m_normalOrPosition) - (m_radiusOrDistance * m_radiusOrDistance);
 
+
 	float discriminant = (b*b) - 4.0f * a * c;
 
 	if(discriminant < 0.0f) return NO_INTERSECTION;
@@ -68,6 +72,7 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 
 	float t1 = (-b + discriminant) / (2.0f * a);
 	float t2 = (-b - discriminant) / (2.0f * a);
+
 
 	if(t1 < t2 && t1 > 0.0f) return t1;
 

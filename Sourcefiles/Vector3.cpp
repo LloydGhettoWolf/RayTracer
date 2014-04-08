@@ -18,6 +18,7 @@ Vector3::Vector3(float a,float b, float c)
 	
 const float Vector3::operator[](int index) const
 {
+
 	//assert(index >= 0 && index <= 2 && "trying to access elem out of range");
 	return m_elems[index];
 }
@@ -48,6 +49,7 @@ Vector3 Vector3::operator/(const Vector3& rhs)const
 {
 	return Vector3(m_elems[0] / rhs[0],m_elems[1] / rhs[1],m_elems[2] / rhs[2]);
 }
+
 
 Vector3 Vector3::operator/(const float rhs)const
 {
@@ -87,12 +89,6 @@ float    Vector3::Length() const
 }
 
 
-Vector3  Project(const Vector3& vec1,const Vector3& vec2)
-{
-	//return otherVector * (DotProduct(otherVector) / otherVector.DotProduct(otherVector));
-
-	return vec2 * (DotProduct(vec1,vec2)/DotProduct(vec2,vec1));
-}
 
 Vector3 operator*(float scalar,const Vector3& vec)
 {
@@ -139,4 +135,5 @@ Vector3  CrossProduct(const Vector3& lhs,const Vector3& rhs)
 float   DotProduct(const Vector3& lhs,const Vector3& rhs)
 {
 	return lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2];
+
 }

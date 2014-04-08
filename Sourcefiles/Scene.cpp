@@ -4,9 +4,11 @@
 const int MAX_LIGHTS = 10;
 const int MAX_OBJS   = 10;
 
+
 #define SPECULAR_ON
 
 #define SHADOWS_ON
+
 
 /*
 AddLight(Light* newLight)
@@ -17,7 +19,6 @@ Side Effects: current number of lights incremented by one and light pointer adde
 void  Scene::AddLight(Light* newLight)
 {
 	//assert(m_numLights < MAX_LIGHTS && "tried to add too many lights! \n");
-
 	m_lights[m_numLights++] = newLight;
 }
 
@@ -40,12 +41,14 @@ Args: A ray to test for intersections against
 Return: A color of the intersected shape if any intersections, or solid black if not
 Side Effects: None!
 */
+
 Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 {
 
 	//find the lowest timeValue for any intersection
 	float t = 1000.0f;
 	SceneObject *sceneObj = NULL;
+
 
 	Vector3 surfaceNormal;
 	Vector3 reflectDirection;
@@ -56,6 +59,7 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 	for(int shape = 0; shape < m_numObjects; shape++)
 	{
 		if(shape == currentShape) continue;
+
 
 		float newT = m_sceneObjects[shape]->GetIntersection(ray); 
 		
@@ -92,7 +96,14 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 			sceneObj->m_material.reflection * TraceRay(newRay,depth-1,nextCurrentShape);
 	}
 
-	 
+
+	if(t == 1000.0f) 
+	{
+		t = NO_INTERSECTION;
+	}
+
+	return t == NO_INTERSECTION ? Color(0.0f,0.0f,0.0f) : GenerateColor(ray.GetOrigin() + t * ray.GetDirection(),sceneObj,surfaceNormal);
+
 }
 
 /*
@@ -102,6 +113,7 @@ Args: point - A Vector3 ref that contains the intersection point co ordinates
 Return: A generated color from the lighting
 Side Effects: None!
 */
+
 
 Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vector3& normal)const
 {
@@ -154,6 +166,7 @@ float dotProduct = DotProduct(toLight,normal);
 
 	
 	return newColor * lightCoeff;
+
 }
 
 /*
@@ -174,6 +187,7 @@ void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int
 			int offset     = y * imgSize + x; 
 			Ray   pixelRay = cam.GetRayForPixel(x,y,imgSize);
 			Color col      = TraceRay(pixelRay,2);
+
 			col			   = 255.0f * col;
 			col.Clamp((float)0,(float)255);
 
@@ -189,7 +203,6 @@ void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int
 void Scene::WriteToFile(ofstream& outFile,int imgSize)
 {
 	outFile <<"P3 "<< imgSize << " " << imgSize << " " << 255 << " \n";
-
 
 	for(int y = 0; y < imgSize; y++)
 	{

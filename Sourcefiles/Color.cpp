@@ -17,13 +17,17 @@ Color::Color(float a,float b, float c)
 	
 const float Color::operator[](int index) const
 {
+
 	//assert(index >= 0 && index <= 2 && "trying to access elem out of range");
+
 	return m_elems[index];
 }
 
 float&	Color::operator[](int index)
 {
+
 	//assert(index >= 0 && index <= 2 && "trying to access elem out of range");
+
 	return m_elems[index];
 }
 

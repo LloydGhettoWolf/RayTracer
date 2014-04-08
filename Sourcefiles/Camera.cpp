@@ -14,6 +14,7 @@ Camera::Camera(Vector3& position,Vector3& lookAt,Vector3& up,float fov):m_positi
 
 	m_upVector    = Normalize(m_upVector);
 
+
 	m_fov = DEG_TO_RAD(m_fov);
 
 	m_distance  = 0.5f/tan(m_fov/2.0f);
@@ -30,6 +31,7 @@ Ray Camera::GetRayForPixel(int x,int y,int imgSize)const
 
 	//Vector3 pixelDir = Vector3((float)x,(float)y,0.0f) - m_position;
 	//pixelDir = Normalize(pixelDir);
+
 
 	return Ray(pixelDir,m_position);
 }
