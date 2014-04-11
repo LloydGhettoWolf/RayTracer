@@ -55,5 +55,6 @@ Vector3  Normalize(const Vector3& vec);
 Vector3  operator*(float scalar,const Vector3& vec);
 Vector3  operator*(const Vector3& vec,float scalar);
 ostream& operator<<(ostream& os,const Vector3& vec);
+istream& operator>>(istream& is,Vector3& vec);
 
 #endif

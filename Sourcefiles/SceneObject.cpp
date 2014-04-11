@@ -78,3 +78,53 @@ float			SceneObject::GetSphereIntersection(const Ray& ray)
 	return NO_INTERSECTION;
 
 }
+
+istream& operator >>(istream& is,Material& mat)
+{
+	char input;
+
+	is >> input;
+
+	if(input == '(')
+	{
+		
+		is >> mat.diffuse >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> mat.reflection >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> mat.refraction >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> mat.specular >> input;
+
+		if(input != ')')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+	}
+	else
+	{
+		is.clear(ios_base::failbit);
+		return is;
+	}
+
+	return is;
+}

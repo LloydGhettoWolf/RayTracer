@@ -38,5 +38,6 @@ class Color
 Color operator*(float scalar,const Color& col);
 Color operator*(const Color& col,float scalar);
 ostream& operator<<(ostream& os,const Color& col);
+istream& operator>>(istream& is,Color& vec);
 
 #endif

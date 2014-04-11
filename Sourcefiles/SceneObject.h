@@ -17,11 +17,12 @@ struct Material
 	float refraction;
 };
 
+istream& operator >>(istream& in,Material& mat);
 
 class SceneObject
 {
 	public:
-		SceneObject(Color& col,ShapeType type,Vector3& norm_pos,float radius_dist,Material& material):
+		SceneObject(ShapeType type,Vector3& norm_pos,float radius_dist,Color& col,Material& material):
 		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_material(material){};
 
 

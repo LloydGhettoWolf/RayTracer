@@ -18,6 +18,7 @@
     <ClInclude Include="Sourcefiles\Ray.h" />
     <ClInclude Include="Sourcefiles\Scene.h" />
     <ClInclude Include="Sourcefiles\SceneObject.h" />
+    <ClInclude Include="Sourcefiles\SceneReader.h" />
     <ClInclude Include="Sourcefiles\Vector3.h" />
   </ItemGroup>
   <ItemGroup>
@@ -26,6 +27,7 @@
     <ClCompile Include="Sourcefiles\main.cpp" />
     <ClCompile Include="Sourcefiles\Scene.cpp" />
     <ClCompile Include="SourceFiles\SceneObject.cpp" />
+    <ClCompile Include="SourceFiles\SceneReader.cpp" />
     <ClCompile Include="Sourcefiles\Vector3.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -105,6 +105,48 @@ ostream& operator<<(ostream& os,const Vector3& vec)
 	return os <<" x: "<< vec[0] <<" y: "<< vec[1] <<" z: "<<vec[2]; 
 }
 
+istream& operator>>(istream& is,Vector3& vec)
+{
+	char input;
+
+	is >> input;
+
+	if(input == '(')
+	{
+		
+		is >> vec[0] >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> vec[1] >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> vec[2] >> input;
+
+		if(input != ')')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+	}
+	else
+	{
+		is.clear(ios_base::failbit);
+		return is;
+	}
+
+	return is;
+}
+
 Vector3 operator-(const Vector3& vec)
 {
 	return Vector3(-vec[0],-vec[1],-vec[2]);

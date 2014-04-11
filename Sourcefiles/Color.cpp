@@ -113,3 +113,45 @@ ostream& operator<<(ostream& os,const Color& vec)
 {
 	return os <<" x: "<< vec[0] <<" y: "<< vec[1] <<" z: "<<vec[2]; 
 }
+
+istream& operator>>(istream& is,Color& col)
+{
+	char input;
+
+	is >> input;
+
+	if(input == '[')
+	{
+		
+		is >> col[0] >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> col[1] >> input;
+
+		if(input != ',')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+
+		is >> col[2] >> input;
+
+		if(input != ']')
+		{
+			is.clear(ios_base::failbit);
+			return is;
+		}
+	}
+	else
+	{
+		is.clear(ios_base::failbit);
+		return is;
+	}
+
+	return is;
+}

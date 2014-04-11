@@ -1,16 +1,33 @@
 //Scene.cpp
 #include "Scene.h"
 
-const int MAX_LIGHTS = 10;
-const int MAX_OBJS   = 10;
-
 
 #define SPECULAR_ON
 
 #define SHADOWS_ON
 
 
-const int DEPTH = 3;
+
+Scene::~Scene()
+{
+	for(int light = 0; light < m_numLights; light++)
+		delete m_lights[light];
+
+	for(int obj = 0; obj < m_numObjects; obj++)
+		delete m_sceneObjects[obj];
+
+	if(m_SceneMem)
+		delete [] m_SceneMem;
+
+	delete m_camera;
+}
+
+void  Scene::SetImageSize(int imgSize)
+{
+	m_imgSize = imgSize;
+	m_SceneMem = new rgbColorVal[imgSize*imgSize]; 
+	m_imgSizeSet = true;
+}
 
 /*
 AddLight(Light* newLight)
@@ -32,7 +49,7 @@ Side Effects: current number of sceneObjects incremented by one and sceneObject 
 */
 void  Scene::AddObject(SceneObject* newObject)
 {
-	assert(m_numObjects < MAX_LIGHTS && "tried to add too many lights! \n");
+	assert(m_numObjects < MAX_SHAPES && "tried to add too many objects! \n");
 
 	m_sceneObjects[m_numObjects++] = newObject;
 }
@@ -171,7 +188,7 @@ horizontal and vertical
 Return - none
 Side Effects - the output file is turned into a .ppm file of the raytraced image generated
 */
-void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int imgSize)
+void Scene::Render(int xStart,int xEnd,int yStart,int yEnd,int imgSize,int depth)
 {
 	int imgBottom = imgSize * (imgSize-1);
 
@@ -180,8 +197,8 @@ void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int
 		for(int x = xStart; x < xEnd;x++)
 		{
 			int offset     = imgBottom - (y * imgSize) + x; 
-			Ray   pixelRay = cam.GetRayForPixel(x,y,imgSize);
-			Color col      = TraceRay(pixelRay,DEPTH);
+			Ray   pixelRay = m_camera->GetRayForPixel(x,y,imgSize);
+			Color col      = TraceRay(pixelRay,depth);
 
 			col			   = 255.0f * col;
 			col.Clamp((float)0,(float)255);
@@ -195,10 +212,16 @@ void Scene::Render(const Camera& cam,int xStart,int xEnd,int yStart,int yEnd,int
 
 }
 
+/*
+Scene::WriteToTGAFile(ofstream& outfile,int imgSize)
+Args - ref to an outfile stream and the imgsize - width and height are the same
+Return vals - none
+Side Effects - writes the image stored in scene mem to the outfile so that a .tga texture file is performed.
+Fast! Writes out in about 6 milliseconds :)
+*/
 
 void Scene::WriteToTGAFile(ofstream& outFile,int imgSize)
 {
-
 
    char headerFile[18] = {0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0} ;
 
