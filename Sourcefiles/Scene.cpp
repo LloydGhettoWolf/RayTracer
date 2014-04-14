@@ -88,7 +88,7 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 		if(shape == currentShape) continue;
 
 
-		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot); 
+		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot,true); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
@@ -102,15 +102,8 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 	{
 		return Color(0.0f,0.0f,0.0f);
 	}
-	/*else if(depth == 1)
-	{
-		point = rayOrigin + t * rayDirection;
-		surfaceNormal = sceneObj->GetSurfaceNormal(point);
-		return GenerateColor(point,sceneObj,surfaceNormal);
-	}*/
 	else
 	{
-		//assert("it should never enter here!");
 		point = rayOrigin + t * rayDirection;
 		surfaceNormal = sceneObj->GetSurfaceNormal(point);
 		reflectDirection = Normalize(rayDirection - (2.0f * DotProduct(rayDirection,surfaceNormal))*surfaceNormal);
@@ -152,14 +145,14 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 		
 #ifdef SHADOWS_ON
 		Vector3 rayOri = point + toLight * 0.001f;
-		float rayDirDot = DotProduct(toLight,toLight);
-		float rayOriDot = DotProduct(rayOri,rayOri);
-		float rayOriDirDot		= DotProduct(toLight,rayOri);
+		float rayDirDot		= DotProduct(toLight,toLight);
+		float rayOriDot		= DotProduct(rayOri,rayOri);
+		float rayOriDirDot	= DotProduct(toLight,rayOri);
 
 		for(int shape = 0; shape < m_numObjects; shape++)
 		{
 
-			float newT = m_sceneObjects[shape]->GetIntersection(rayOri,toLight,rayDirDot,rayOriDot,rayOriDot); 
+			float newT = m_sceneObjects[shape]->GetIntersection(rayOri,toLight,rayDirDot,rayOriDot,rayOriDirDot); 
 		
 			if(newT<t && newT != NO_INTERSECTION)
 			{
@@ -168,10 +161,11 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 		}
 #endif
 
-float dotProduct = DotProduct(toLight,normal);
+
 
 #ifdef SPECULAR_ON
 
+    float dotProduct = DotProduct(toLight,normal);
 	Vector3 reflectVector = toLight - 2.0f * dotProduct * normal;
 
 	float specCoeff  = DotProduct(Normalize(point),reflectVector);
@@ -206,7 +200,6 @@ void Scene::Render(int xStart,int xEnd,int yStart,int yEnd,int imgSize,int depth
 	int imgSizeMinusOne = imgSize-1;
 	float ratio = 1.0f/(float)(imgSize);
 
-	SceneObject::SetOriginDot(DotProduct(m_camera->GetOrigin(),m_camera->GetOrigin()));
 
 	for(int y = yStart; y < yEnd; y++)
 	{

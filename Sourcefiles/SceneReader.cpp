@@ -11,32 +11,34 @@ void SceneReader::InitReaderFuncs()
 
 SceneObject* SceneReader::ReadSphere(istream& strStream)
 {
-	Vector3  pos;		
+	Vector3  pos;
+	Vector3  rayOri;
 	float    radius;  
 	Color    col;		   
 	Material mat;        
 
-	strStream >> pos >> radius >> col >> mat;
+	strStream >> pos >> radius >> col >> mat >> rayOri;
 
-	SceneObject* obj = new SceneObject(SPHERETYPE,pos,radius,col,mat);
+	SceneObject* obj = new SceneObject(SPHERETYPE,pos,radius,col,mat,rayOri);
 	return obj;
 }
 
 SceneObject* SceneReader::ReadPlane(istream&  strStream)
 {
 	Vector3  normal;
+	Vector3  rayOri;
 	float    distance;
 	Color    col;
 	Material mat;
 
-	strStream >> normal >> distance >> col >> mat;
+	strStream >> normal >> distance >> col >> mat >> rayOri;
 
 	if(strStream.rdstate() & ios_base::failbit)
 	{
 		return NULL;
 	}
 
-	SceneObject* obj = new SceneObject(PLANETYPE,normal,distance,col,mat);
+	SceneObject* obj = new SceneObject(PLANETYPE,normal,distance,col,mat,rayOri);
 	return obj;
 }
 
