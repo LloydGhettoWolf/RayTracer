@@ -1,15 +1,15 @@
 //SceneObject.cpp	
 #include "SceneObject.h"
 
-float			SceneObject::GetIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOriDot,float rayDirOriDot)
+float	SceneObject::GetIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOriDot,float rayDirOriDot,bool primary)
 {
 	switch(m_type)
 	{
 		case SPHERETYPE:
-			return GetSphereIntersection(rayOrigin,rayDirection,rayDirDot,rayOriDot,rayDirOriDot);
+			return GetSphereIntersection(rayOrigin,rayDirection,rayDirDot,rayOriDot,rayDirOriDot,primary);
 			break;
 		case PLANETYPE:
-			return GetPlaneIntersection(rayOrigin,rayDirection);
+			return GetPlaneIntersection(rayOrigin,rayDirection,primary);
 			break;
 	}
 }
@@ -31,29 +31,38 @@ const Vector3&  SceneObject::GetSurfaceNormal(const Vector3& point)const
 const Vector3&  SceneObject::GetSphereNormal(const Vector3& point)const
 {
 	Vector3 vec = point - m_normalOrPosition;
+	//return point - m_normalOrPosition;
 	return Normalize(vec);
 }
 
-float			SceneObject::GetPlaneIntersection(const Vector3& rayOrigin,const Vector3& rayDirection)
+float	SceneObject::GetPlaneIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,bool primary)
 {
-
-	float val1 = DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
+	float val1 = primary ? -m_rayOriNormalDot + m_radiusOrDistance : DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
+	//float val1 = DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
 	float val2 = DotProduct(rayDirection,m_normalOrPosition);
 	float tVal = val1/val2;
 
 	return tVal  > 0.0f ? tVal : NO_INTERSECTION; 
 }
 
-float	SceneObject::GetSphereIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOrigDot,float rayOriDirDot)
+float	SceneObject::GetSphereIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOrigDot,float rayOriDirDot,bool primary)
 {
 	
 	float b = 2.0f * (rayOriDirDot - DotProduct(rayDirection,m_normalOrPosition));
+	float c;
 
-	float c = rayOrigDot + m_normalDot
-			- 2.0f * DotProduct(rayOrigin,m_normalOrPosition) - m_radiusSquared;
+	if(primary)
+	{
+		c = rayOrigDot + m_normalDot - 2.0f * m_rayOriNormalDot - m_radiusSquared;
+	}
+	else
+	{
+
+		c = rayOrigDot + m_normalDot - 2.0f * DotProduct(rayOrigin,m_normalOrPosition) - m_radiusSquared;
+	}
 
 	
-	//the value for a is raydot
+	//the value for a is raydirdot
 	float discriminant = (b*b) - 4.0f * rayDirDot * c;
 
 	if(discriminant < 0.0f) return NO_INTERSECTION;
@@ -62,9 +71,9 @@ float	SceneObject::GetSphereIntersection(const Vector3& rayOrigin,const Vector3&
 
 	if(-b+discriminant < 0.0f) return NO_INTERSECTION;
 
-	float denom = (2.0f * rayDirDot);
-	float t1 = (-b + discriminant) / denom;
-	float t2 = (-b - discriminant) / denom;
+	float denom = 1.0f/(2.0f * rayDirDot);
+	float t1 = (-b + discriminant) * denom;
+	float t2 = (-b - discriminant) * denom;
 
 
 	//if(t1 < t2 && t1 > 0.0f) return t1;
@@ -126,5 +135,3 @@ istream& operator >>(istream& is,Material& mat)
 
 	return is;
 }
-
-float SceneObject::m_originDot = 0.0f;
