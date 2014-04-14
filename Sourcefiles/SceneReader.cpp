@@ -69,7 +69,7 @@ Camera*  SceneReader::ReadCamera(istream& strStream)
 		return NULL;
 	}
 
-	Camera* cam = new Camera(position,lookAt,up,90.0f);
+	Camera* cam = new Camera(position,lookAt,up);
 	return cam;
 }
 

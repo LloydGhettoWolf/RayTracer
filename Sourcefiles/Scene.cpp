@@ -63,6 +63,7 @@ Side Effects: None!
 
 Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 {
+	if(depth <= 0) return Color(0.0f,0.0f,0.0f);
 
 	//find the lowest timeValue for any intersection
 	float t = 1000.0f;
@@ -73,6 +74,13 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 	Vector3 reflectDirection;
 	Vector3 point;
 
+	Vector3 rayOrigin    = ray.GetOrigin();
+	Vector3 rayDirection = ray.GetDirection();
+
+	float rayDot			= DotProduct(rayDirection,rayDirection);
+	float rayOriDot			= DotProduct(rayOrigin,rayOrigin);
+	float rayOriDirDot		= DotProduct(rayDirection,rayOrigin);
+
 	int nextCurrentShape = currentShape;
 
 	for(int shape = 0; shape < m_numObjects; shape++)
@@ -80,7 +88,7 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 		if(shape == currentShape) continue;
 
 
-		float newT = m_sceneObjects[shape]->GetIntersection(ray); 
+		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
@@ -94,18 +102,18 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 	{
 		return Color(0.0f,0.0f,0.0f);
 	}
-	else if(depth == 1)
+	/*else if(depth == 1)
 	{
-		point = ray.GetOrigin() + t * ray.GetDirection();
+		point = rayOrigin + t * rayDirection;
 		surfaceNormal = sceneObj->GetSurfaceNormal(point);
 		return GenerateColor(point,sceneObj,surfaceNormal);
-	}
+	}*/
 	else
 	{
 		//assert("it should never enter here!");
-		point = ray.GetOrigin() + t * ray.GetDirection();
+		point = rayOrigin + t * rayDirection;
 		surfaceNormal = sceneObj->GetSurfaceNormal(point);
-		reflectDirection = Normalize(ray.GetDirection() - (2.0f * DotProduct(ray.GetDirection(),surfaceNormal))*surfaceNormal);
+		reflectDirection = Normalize(rayDirection - (2.0f * DotProduct(rayDirection,surfaceNormal))*surfaceNormal);
 
 		Ray newRay = Ray(reflectDirection,point+reflectDirection * 0.001f);
 
@@ -143,11 +151,15 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 		float t = 1000.0f;
 		
 #ifdef SHADOWS_ON
+		Vector3 rayOri = point + toLight * 0.001f;
+		float rayDirDot = DotProduct(toLight,toLight);
+		float rayOriDot = DotProduct(rayOri,rayOri);
+		float rayOriDirDot		= DotProduct(toLight,rayOri);
 
 		for(int shape = 0; shape < m_numObjects; shape++)
 		{
 
-			float newT = m_sceneObjects[shape]->GetIntersection(Ray(toLight,point + toLight * 0.001f)); 
+			float newT = m_sceneObjects[shape]->GetIntersection(rayOri,toLight,rayDirDot,rayOriDot,rayOriDot); 
 		
 			if(newT<t && newT != NO_INTERSECTION)
 			{
@@ -191,17 +203,21 @@ Side Effects - the output file is turned into a .ppm file of the raytraced image
 void Scene::Render(int xStart,int xEnd,int yStart,int yEnd,int imgSize,int depth)
 {
 	int imgBottom = imgSize * (imgSize-1);
+	int imgSizeMinusOne = imgSize-1;
+	float ratio = 1.0f/(float)(imgSize);
+
+	SceneObject::SetOriginDot(DotProduct(m_camera->GetOrigin(),m_camera->GetOrigin()));
 
 	for(int y = yStart; y < yEnd; y++)
 	{
 		for(int x = xStart; x < xEnd;x++)
 		{
 			int offset     = imgBottom - (y * imgSize) + x; 
-			Ray   pixelRay = m_camera->GetRayForPixel(x,y,imgSize);
+			Ray   pixelRay = m_camera->GetRayForPixel(x,y,ratio);
 			Color col      = TraceRay(pixelRay,depth);
 
 			col			   = 255.0f * col;
-			col.Clamp((float)0,(float)255);
+			col.Clamp(0.0f,255.0f);
 
 			m_SceneMem[offset].b = (char)col[0];
 			m_SceneMem[offset].g = (char)col[1];

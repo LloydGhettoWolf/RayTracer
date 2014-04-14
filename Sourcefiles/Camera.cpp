@@ -21,17 +21,3 @@ Camera::Camera(Vector3& position,Vector3& lookAt,Vector3& up,float fov):m_positi
 
 }
 
-Ray Camera::GetRayForPixel(int x,int y,int imgSize)const
-{
-	//assert(x >= 0 && y >= 0 && "x or y are less than 0!");
-	//assert(x < imgSize && y < imgSize && "x or y are bigger than image size!");
-
-	Vector3 pixelDir = m_distance * m_lookVector + (0.5f - (float)y/(float)(imgSize-1)) * m_upVector +
-		             ((float)x/(float)(imgSize-1) - 0.5f) * m_rightVector;
-
-	//Vector3 pixelDir = Vector3((float)x,(float)y,0.0f) - m_position;
-	pixelDir = Normalize(pixelDir);
-
-
-	return Ray(pixelDir,m_position);
-}
