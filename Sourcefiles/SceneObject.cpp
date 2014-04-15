@@ -1,15 +1,15 @@
 //SceneObject.cpp	
 #include "SceneObject.h"
 
-float	SceneObject::GetIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOriDot,float rayDirOriDot,bool primary)
+float	SceneObject::GetIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOriDot,float rayDirOriDot)
 {
 	switch(m_type)
 	{
 		case SPHERETYPE:
-			return GetSphereIntersection(rayOrigin,rayDirection,rayDirDot,rayOriDot,rayDirOriDot,primary);
+			return GetSphereIntersection(rayOrigin,rayDirection,rayDirDot,rayOriDot,rayDirOriDot);
 			break;
 		case PLANETYPE:
-			return GetPlaneIntersection(rayOrigin,rayDirection,primary);
+			return GetPlaneIntersection(rayOrigin,rayDirection);
 			break;
 	}
 }
@@ -35,31 +35,20 @@ const Vector3&  SceneObject::GetSphereNormal(const Vector3& point)const
 	return Normalize(vec);
 }
 
-float	SceneObject::GetPlaneIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,bool primary)
+float	SceneObject::GetPlaneIntersection(const Vector3& rayOrigin,const Vector3& rayDirection)
 {
-	float val1 = primary ? -m_rayOriNormalDot + m_radiusOrDistance : DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
-	//float val1 = DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
+	float val1 = DotProduct(-rayOrigin,m_normalOrPosition) + m_radiusOrDistance;
 	float val2 = DotProduct(rayDirection,m_normalOrPosition);
 	float tVal = val1/val2;
 
 	return tVal  > 0.0f ? tVal : NO_INTERSECTION; 
 }
 
-float	SceneObject::GetSphereIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOrigDot,float rayOriDirDot,bool primary)
+float	SceneObject::GetSphereIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOrigDot,float rayOriDirDot)
 {
 	
 	float b = 2.0f * (rayOriDirDot - DotProduct(rayDirection,m_normalOrPosition));
-	float c;
-
-	if(primary)
-	{
-		c = rayOrigDot + m_normalDot - 2.0f * m_rayOriNormalDot - m_radiusSquared;
-	}
-	else
-	{
-
-		c = rayOrigDot + m_normalDot - 2.0f * DotProduct(rayOrigin,m_normalOrPosition) - m_radiusSquared;
-	}
+	float c = rayOrigDot + m_normalDot - 2.0f * DotProduct(rayOrigin,m_normalOrPosition)  - m_radiusSquared;
 
 	
 	//the value for a is raydirdot

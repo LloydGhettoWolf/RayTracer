@@ -88,7 +88,7 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 		if(shape == currentShape) continue;
 
 
-		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot,true); 
+		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
