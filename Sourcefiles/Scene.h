@@ -25,7 +25,7 @@ class Scene
 		void  AddLight(Light* newLight);
 		void  AddObject(SceneObject* newObject);
 		void  AddCamera(Camera* cam) {m_camera = cam;}
-		Color TraceRay(const Ray& ray,int depth = 0,int currentShape = -1) const;
+		Color TraceRay(const Ray& ray,int depth = 0,float reflectIndex = 1.0f,int currentShape = -1) const;
 
 
 		void Render(int xStart,int xEnd,int yStart,int yEnd,int imgSize,int depth);

@@ -61,9 +61,9 @@ Return: A color of the intersected shape if any intersections, or solid black if
 Side Effects: None!
 */
 
-Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
+Color Scene::TraceRay(const Ray& ray,int depth,float reflectIndex,int currentShape) const
 {
-	if(depth <= 0) return Color(0.0f,0.0f,0.0f);
+	if(depth <= 0 || reflectIndex < 0.1f) return Color(0.0f,0.0f,0.0f);
 
 	//find the lowest timeValue for any intersection
 	float t = 1000.0f;
@@ -110,10 +110,9 @@ Color Scene::TraceRay(const Ray& ray,int depth,int currentShape) const
 
 		Ray newRay = Ray(reflectDirection,point+reflectDirection * 0.001f);
 
-		//if(sceneObj->GetType() == PLANETYPE) depth++;
 
 		return GenerateColor(point,sceneObj,surfaceNormal) + 
-			sceneObj->m_material.reflection * TraceRay(newRay,depth-1,nextCurrentShape);
+			sceneObj->m_material.reflection * TraceRay(newRay,depth-1,sceneObj->m_material.reflection * reflectIndex,nextCurrentShape);
 	}
 
 
@@ -138,6 +137,8 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 
 	for(int light = 0; light < m_numLights; light++)
 	{
+		if(lightCoeff == 0.5f) break;
+
 		Vector3 toLight = m_lights[light]->GetPosition() - point;
 		toLight = Normalize(toLight);
 
@@ -157,6 +158,7 @@ Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vec
 			if(newT<t && newT != NO_INTERSECTION)
 			{
 				lightCoeff = 0.5f;
+				break;
 			}
 		}
 #endif
