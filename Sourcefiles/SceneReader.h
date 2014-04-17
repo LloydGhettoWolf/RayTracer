@@ -23,8 +23,9 @@ class SceneReader
 		SceneObject* ReadSphere(istream& strStream);
 		SceneObject* ReadPlane(istream&  strStream);
 
-		Light*   ReadLight(istream& strStream);
-		Camera*  ReadCamera(istream& strStream);
+		Light*    ReadLight(istream& strStream);
+		Camera*   ReadCamera(istream& strStream);
+		Material* ReadMaterial(istream& strStream);
 
 		bool ReadSceneDescriptionFile(istream& strStream);
 

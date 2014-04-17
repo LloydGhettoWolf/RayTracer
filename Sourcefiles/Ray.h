@@ -7,6 +7,7 @@
 class Ray
 {
 	public:
+		Ray(){};
 		Ray(const Vector3& dir,const Vector3& ori):m_direction(dir),m_origin(ori){ };
 
 

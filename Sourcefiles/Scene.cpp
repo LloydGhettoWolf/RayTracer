@@ -54,6 +54,13 @@ void  Scene::AddObject(SceneObject* newObject)
 	m_sceneObjects[m_numObjects++] = newObject;
 }
 
+void Scene::AddMaterial(Material* newMaterial)
+{
+	assert(m_numMaterials < MAX_MATERIALS && "tried to add too many materials! \n");
+
+	m_materials[m_numMaterials++] = newMaterial;
+}
+
 /*
 TraceRay(const Ray& ray)
 Args: A ray to test for intersections against
@@ -61,133 +68,102 @@ Return: A color of the intersected shape if any intersections, or solid black if
 Side Effects: None!
 */
 
-Color Scene::TraceRay(const Ray& ray,int depth,float reflectIndex,int currentShape) const
+Color Scene::TraceRay(const Ray& ray,int depth) const
 {
-	if(depth <= 0 || reflectIndex < 0.1f) return Color(0.0f,0.0f,0.0f);
+	Color thisPixel(0.0f,0.0f,0.0f);
 
+	SceneObject* obj = NULL;
+
+	Vector3 origin    = ray.GetOrigin();
+	Vector3 direction = ray.GetDirection();
+
+	float t = FindNearest(origin,direction,&obj);
+
+	if(!obj)
+	{
+		return thisPixel;
+	}
+	else
+	{
+		Vector3 intersectionPoint = origin + t * direction;
+		Vector3 lightVectorDir;
+		for(int light = 0; light < m_numLights; light++)
+		{
+			float coeff = CalcShade(m_lights[light],intersectionPoint,lightVectorDir);
+			if(coeff > 0.0f)
+			{
+				float diffCoeff = m_materials[obj->m_matIndex]->m_diffuse;
+
+				Vector3 normal = obj->GetSurfaceNormal(intersectionPoint);
+				thisPixel +=  m_lights[light]->GetColor() * obj->GetColor() * diffCoeff  
+								  * max(DotProduct(lightVectorDir,normal),0.0f);
+				
+				float refIndex = m_materials[obj->m_matIndex]->m_reflection;
+
+				if(depth > 1 && refIndex > 0.1f)
+				{
+					Vector3 newReflectRay = direction - 2.0f * DotProduct(direction,normal) * normal;
+					thisPixel += refIndex * TraceRay(Ray(newReflectRay,intersectionPoint + newReflectRay * 0.001f),depth-1);
+				}
+			}
+		}
+	}
+
+	return thisPixel;
+
+}
+
+float Scene::FindNearest(const Vector3& rayOrigin,const Vector3& rayDirection,SceneObject** obj)const
+{
 	//find the lowest timeValue for any intersection
 	float t = 1000.0f;
-	SceneObject *sceneObj = NULL;
-
 
 	Vector3 surfaceNormal;
 	Vector3 reflectDirection;
 	Vector3 point;
 
-	Vector3 rayOrigin    = ray.GetOrigin();
-	Vector3 rayDirection = ray.GetDirection();
 
 	float rayDot			= DotProduct(rayDirection,rayDirection);
 	float rayOriDot			= DotProduct(rayOrigin,rayOrigin);
 	float rayOriDirDot		= DotProduct(rayDirection,rayOrigin);
 
-	int nextCurrentShape = currentShape;
-
 	for(int shape = 0; shape < m_numObjects; shape++)
 	{
-		if(shape == currentShape) continue;
-
 
 		float newT = m_sceneObjects[shape]->GetIntersection(rayOrigin,rayDirection,rayDot,rayOriDot,rayOriDirDot); 
 		
 		if(newT<t && newT != NO_INTERSECTION)
 		{
 			t = newT;
-			sceneObj = m_sceneObjects[shape];
-			nextCurrentShape = shape;
+			*obj = m_sceneObjects[shape];
 		}
 	}
 
 	if(t == 1000.0f || t == NO_INTERSECTION) 
 	{
-		return Color(0.0f,0.0f,0.0f);
+		return 0.0f;
 	}
 	else
 	{
-		point = rayOrigin + t * rayDirection;
-		surfaceNormal = sceneObj->GetSurfaceNormal(point);
-		reflectDirection = Normalize(rayDirection - (2.0f * DotProduct(rayDirection,surfaceNormal))*surfaceNormal);
-
-		Ray newRay = Ray(reflectDirection,point+reflectDirection * 0.001f);
-
-
-		return GenerateColor(point,sceneObj,surfaceNormal) + 
-			sceneObj->m_material.reflection * TraceRay(newRay,depth-1,sceneObj->m_material.reflection * reflectIndex,nextCurrentShape);
+		return t;
 	}
-
-
 }
 
-/*
-GenerateColor(const Vector3& point,const SceneObject* obj)const
-Args: point - A Vector3 ref that contains the intersection point co ordinates
-      obj - a pointer to a sceneObject to generate the color for
-Return: A generated color from the lighting
-Side Effects: None!
-*/
-
-
-Color Scene::GenerateColor(const Vector3& point,const SceneObject* obj,const Vector3& normal)const
+float Scene::CalcShade(Light* light,const Vector3& intersectionPoint,Vector3& lightVectorDir)const
 {
-	Color newColor(0.0f,0.0f,0.0f);
-	Color spec(0.0f,0.0f,0.0f);
-	Color diffuse(0.0f,0.0f,0.0f);
+	SceneObject* obj = NULL;
 
-	float lightCoeff = 1.0f;
+	Vector3 toLightDir = Normalize(light->GetPosition() - intersectionPoint);
+	lightVectorDir = toLightDir;
 
-	for(int light = 0; light < m_numLights; light++)
-	{
-		if(lightCoeff == 0.5f) break;
-
-		Vector3 toLight = m_lights[light]->GetPosition() - point;
-		toLight = Normalize(toLight);
-
-		float t = 1000.0f;
-		
-#ifdef SHADOWS_ON
-		Vector3 rayOri = point + toLight * 0.001f;
-		float rayDirDot		= DotProduct(toLight,toLight);
-		float rayOriDot		= DotProduct(rayOri,rayOri);
-		float rayOriDirDot	= DotProduct(toLight,rayOri);
-
-		for(int shape = 0; shape < m_numObjects; shape++)
-		{
-
-			float newT = m_sceneObjects[shape]->GetIntersection(rayOri,toLight,rayDirDot,rayOriDot,rayOriDirDot); 
-		
-			if(newT<t && newT != NO_INTERSECTION)
-			{
-				lightCoeff = 0.5f;
-				break;
-			}
-		}
-#endif
-
-
-
-#ifdef SPECULAR_ON
-
-    float dotProduct = DotProduct(toLight,normal);
-	Vector3 reflectVector = toLight - 2.0f * dotProduct * normal;
-
-	float specCoeff  = DotProduct(Normalize(point),reflectVector);
-	spec    = obj->m_material.specular * Color(1.0f,1.0f,1.0f) *  pow(specCoeff,40.0f);
-
-	//assert(dotProduct <= 1.0f && "dotProduct is over 1.0f!");
-
-	diffuse = obj->m_material.diffuse  * obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
-#else
-    diffuse =  obj->GetColor() * m_lights[light]->GetColor() *  max(dotProduct,0.0f);
-#endif
-
-
-		newColor += diffuse + spec;
-	}
-
+	FindNearest(intersectionPoint  + toLightDir * 0.0001f,toLightDir,&obj);
 	
-	return newColor * lightCoeff;
+	if(obj) return 0.0f;
 
+	return 1.0f;
 }
+
+
 
 /*
 Scene::Render(const Camera& cam,ofstream& outStream,int imgSize)
@@ -214,12 +190,14 @@ void Scene::Render(int xStart,int xEnd,int yStart,int yEnd,int imgSize,int depth
 			col			   = 255.0f * col;
 			col.Clamp(0.0f,255.0f);
 
-			m_SceneMem[offset].b = (char)col[0];
-			m_SceneMem[offset].g = (char)col[1];
-			m_SceneMem[offset].r = (char)col[2];
+			m_SceneMem[offset].b = col[0];
+			m_SceneMem[offset].g = col[1];
+			m_SceneMem[offset].r = col[2];
 
 		}
 	}
+		
+	
 
 }
 

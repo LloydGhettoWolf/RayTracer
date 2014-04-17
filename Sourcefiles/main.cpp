@@ -87,6 +87,8 @@ int main()
 	int imageSize = myScene.GetImgSize();
 	int depth = myScene.GetDepth();
 
+	
+
 	boost::thread thread1(&Scene::Render,&myScene,0,imageSize/2,0,imageSize/2,imageSize,depth);
 	boost::thread thread2(&Scene::Render,&myScene,0,imageSize/2,imageSize/2,imageSize,imageSize,depth);
 	boost::thread thread3(&Scene::Render,&myScene,imageSize/2,imageSize,0,imageSize/2,imageSize,depth);

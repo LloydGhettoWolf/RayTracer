@@ -9,22 +9,27 @@ const float NO_INTERSECTION = 0.0f;
 
 enum ShapeType {SPHERETYPE,PLANETYPE};
 
-struct Material
+class Material
 {
-	float specular;
-	float diffuse;
-	float reflection;
-	float refraction;
+public:
+
+	Material(float spec,float diff,float reflect,float refract):m_specular(spec),m_diffuse(diff),m_reflection(reflect),
+																m_refraction(refract){};
+
+	float m_specular;
+	float m_diffuse;
+	float m_reflection;
+	float m_refraction;
 };
 
-istream& operator >>(istream& in,Material& mat);
+
 
 class SceneObject
 {
 	public:
-		SceneObject(ShapeType type,Vector3& norm_pos,float radius_dist,Color& col,Material& material):
-		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_material(material),
-		  m_radiusSquared(radius_dist*radius_dist),m_normalDot(DotProduct(norm_pos,norm_pos)){};
+		SceneObject(ShapeType type,Vector3& norm_pos,float radius_dist,Color& col,int matIndex):
+		  m_surfaceColor(col),m_type(type),m_normalOrPosition(norm_pos),m_radiusOrDistance(radius_dist),m_matIndex(matIndex),
+			  m_radiusSquared(radius_dist*radius_dist),m_normalDot(DotProduct(norm_pos,norm_pos)){};
 
 
 		float			GetIntersection(const Vector3& rayOrigin,const Vector3& rayDirection,float rayDirDot,float rayOriDot,
@@ -32,9 +37,7 @@ class SceneObject
 		const Vector3&  GetSurfaceNormal(const Vector3& point)const;
 		const Color&	GetColor()const {return m_surfaceColor;}
 		ShapeType       GetType()const {return m_type;}
-
-
-		Material m_material;
+		int				m_matIndex;
 
 	private:
 		const Vector3&  GetSphereNormal(const Vector3& point)const;
@@ -44,13 +47,12 @@ class SceneObject
 			                                  float rayOriDot,float rayOriDirDot);
 
 		Color		m_surfaceColor;
-		ShapeType	m_type;
-		float		m_radiusOrDistance;
 		Vector3     m_normalOrPosition;
+		float		m_radiusOrDistance;
 		float       m_radiusSquared;
 		float		m_normalDot;
-		float       m_rayOriNormalDot;
-
+		ShapeType	m_type;
+		
 };
 
 
