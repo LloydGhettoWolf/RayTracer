@@ -88,9 +88,11 @@ Color Scene::TraceRay(const Ray& ray,int depth) const
 	{
 		Vector3 intersectionPoint = origin + t * direction;
 		Vector3 lightVectorDir;
+
 		for(int light = 0; light < m_numLights; light++)
 		{
 			float coeff = CalcShade(m_lights[light],intersectionPoint,lightVectorDir);
+
 			if(coeff > 0.0f)
 			{
 				int matIndex = obj->m_matIndex;
@@ -101,8 +103,8 @@ Color Scene::TraceRay(const Ray& ray,int depth) const
 				float dotProd   = DotProduct(lightVectorDir,normal);
 
 				
-				thisPixel +=  m_lights[light]->GetColor() * obj->GetColor() * diffCoeff  
-								  * max(dotProd,0.0f);
+				thisPixel += coeff * m_lights[light]->GetColor() * obj->GetColor() * diffCoeff  
+								   * max(dotProd,0.0f);
 
 				if(specCoeff > 0.1f)
 				{
@@ -167,14 +169,47 @@ float Scene::CalcShade(Light* light,const Vector3& intersectionPoint,Vector3& li
 {
 	SceneObject* obj = NULL;
 
-	Vector3 toLightDir = Normalize(light->GetPosition() - intersectionPoint);
-	lightVectorDir = toLightDir;
-
-	FindNearest(intersectionPoint  + toLightDir * 0.0001f,toLightDir,&obj);
 	
-	if(obj) return 0.0f;
+	if(!light->IsAreaLight())
+	{
+		Vector3 toLightDir = Normalize(light->GetPosition() - intersectionPoint);
+		lightVectorDir = toLightDir;
+		FindNearest(intersectionPoint  + toLightDir * 0.0001f,toLightDir,&obj);
+	
+		if(obj) return 0.0f;
 
-	return 1.0f;
+		return 1.0f;
+	}
+	else
+	{
+		float retValIncr = 1.0f/25.0f;
+		float retVal = 0.0f;
+
+		for(int x = 0; x < 5; x++)
+		{
+			for(int y = 0; y < 5; y++)
+			{
+				float randOffsetX = ((float)rand()/RAND_MAX) + 1;
+				Vector3 toLightDir = Normalize(light->GetPosition() + Vector3((float)x + randOffsetX,0.0f,(float)y + randOffsetX) - intersectionPoint);
+				lightVectorDir = toLightDir;
+				
+				FindNearest(intersectionPoint  + toLightDir * 0.0001f,toLightDir,&obj);
+
+				if(!obj) 
+				{
+					retVal += retValIncr;
+				}
+				else
+				{
+					obj = NULL;
+				}
+
+				
+			}
+		}
+
+		return retVal;
+	}
 }
 
 
