@@ -18,6 +18,8 @@ class Camera
 
 		const Vector3& GetOrigin()const {return m_position;}
 
+		const Vector3& GetLook()const {return m_lookVector;}
+
 	private:
 		Vector3 m_position;
 		Vector3 m_lookVector, m_rightVector,m_upVector;

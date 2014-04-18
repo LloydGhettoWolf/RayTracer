@@ -77,6 +77,7 @@ Color Scene::TraceRay(const Ray& ray,int depth) const
 	Vector3 origin    = ray.GetOrigin();
 	Vector3 direction = ray.GetDirection();
 
+
 	float t = FindNearest(origin,direction,&obj);
 
 	if(!obj)
@@ -92,13 +93,26 @@ Color Scene::TraceRay(const Ray& ray,int depth) const
 			float coeff = CalcShade(m_lights[light],intersectionPoint,lightVectorDir);
 			if(coeff > 0.0f)
 			{
-				float diffCoeff = m_materials[obj->m_matIndex]->m_diffuse;
+				int matIndex = obj->m_matIndex;
+				float diffCoeff = m_materials[matIndex]->m_diffuse;
+				float specCoeff = m_materials[matIndex]->m_specular;
 
 				Vector3 normal = obj->GetSurfaceNormal(intersectionPoint);
-				thisPixel +=  m_lights[light]->GetColor() * obj->GetColor() * diffCoeff  
-								  * max(DotProduct(lightVectorDir,normal),0.0f);
+				float dotProd   = DotProduct(lightVectorDir,normal);
+
 				
-				float refIndex = m_materials[obj->m_matIndex]->m_reflection;
+				thisPixel +=  m_lights[light]->GetColor() * obj->GetColor() * diffCoeff  
+								  * max(dotProd,0.0f);
+
+				if(specCoeff > 0.1f)
+				{
+					Vector3 specReflect = lightVectorDir- 2.0f * dotProd * normal;
+
+					thisPixel += m_lights[light]->GetColor() * Color(1.0f,1.0f,1.0f) * specCoeff
+						* pow(DotProduct(direction,specReflect),20.0f);
+				}
+				
+				float refIndex = m_materials[matIndex ]->m_reflection;
 
 				if(depth > 1 && refIndex > 0.1f)
 				{
